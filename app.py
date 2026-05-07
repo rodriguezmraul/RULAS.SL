@@ -130,10 +130,39 @@ if st.session_state.db_seguimiento or st.session_state.db_presupuesto:
 
     with col_mail:
         if st.button("📧 Enviar por Correo a Empresa"):
-            # Aquí iría la lógica de smtplib. 
-            # Por seguridad y simplicidad en este ejemplo, simulamos el envío:
-            st.info("Configura tu servidor SMTP para enviar el correo a: ana@fundacionmasaveu.com")
-            st.warning("El envío automático requiere credenciales de servidor de correo (Gmail/Outlook).")
+            try:
+                # 1. Configuración de credenciales (se sacan de 'Secrets')
+                email_usuario = st.secrets["email_user"]
+                email_password = st.secrets["email_password"]
+                email_destino = "ana@fundacionmasaveu.com"
 
-else:
-    st.info("No hay datos registrados todavía.")
+                # 2. Crear el mensaje
+                import smtplib
+                from email.mime.multipart import MIMEMultipart
+                from email.mime.text import MIMEText
+                from email.mime.base import MIMEBase
+                from email import encoders
+
+                msg = MIMEMultipart()
+                msg['From'] = email_usuario
+                msg['To'] = email_destino
+                msg['Subject'] = f"Reporte de Obra - {datetime.now().strftime('%d/%m/%Y')}"
+                msg.attach(MIMEText("Se adjunta el reporte de seguimiento y presupuesto.", 'plain'))
+
+                # 3. Adjuntar el Excel que ya generaste
+                part = MIMEBase('application', 'octet-stream')
+                part.set_payload(excel_data)
+                encoders.encode_base64(part)
+                part.add_header('Content-Disposition', f"attachment; filename=reporte.xlsx")
+                msg.attach(part)
+
+                # 4. Envío real (Usando el servidor de Gmail)
+                server = smtplib.SMTP('smtp.gmail.com', 587)
+                server.starttls()
+                server.login(email_usuario, email_password)
+                server.sendmail(email_usuario, email_destino, msg.as_string())
+                server.quit()
+
+                st.success("✅ ¡Correo enviado con éxito!")
+            except Exception as e:
+                st.error(f"Error técnico: {e}")
