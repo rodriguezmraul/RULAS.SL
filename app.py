@@ -132,7 +132,7 @@ if st.session_state.db_seguimiento or st.session_state.db_presupuesto:
         if st.button("📧 Enviar por Correo a Empresa"):
             # Aquí iría la lógica de smtplib. 
             # Por seguridad y simplicidad en este ejemplo, simulamos el envío:
-            st.info("Configura tu servidor SMTP para enviar el correo a:ana@fundacionmasaveu.com")
+            st.info("Configura tu servidor SMTP para enviar el correo a: ana@fundacionmasaveu.com")
             st.warning("El envío automático requiere credenciales de servidor de correo (Gmail/Outlook).")
 
 else:
